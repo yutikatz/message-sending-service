@@ -1,5 +1,6 @@
 using Sms.Api.Data;
 using Sms.Api.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace Sms.Api.Endpoints;
 
