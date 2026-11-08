@@ -1,0 +1,11 @@
+**/bin
+**/obj
+**/node_modules
+web/dist
+web/.angular
+*.db
+*.db-shm
+*.db-wal
+.git
+.vs
+TestResults

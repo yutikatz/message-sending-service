@@ -1,0 +1,52 @@
+# One command: docker compose up --build
+#   web (Angular + nginx)  -> http://localhost:4200
+#   api (.NET 8)           -> http://localhost:5080  (also /swagger)
+#   sqlserver              -> internal only, persisted in a named volume
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${SA_PASSWORD:-Dev_password123!}
+      MSSQL_PID: Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
+    healthcheck:
+      # The API only starts once SQL Server actually accepts connections.
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: src/Sms.Api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Docker
+      ASPNETCORE_URLS: http://+:8080
+      Database__Provider: SqlServer
+      ConnectionStrings__Default: "Server=sqlserver,1433;Database=SmsService;User Id=sa;Password=${SA_PASSWORD:-Dev_password123!};TrustServerCertificate=True;Encrypt=False"
+    ports:
+      - "5080:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - "4200:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  mssql-data:

@@ -1,0 +1,31 @@
+# Angular
+.angular/
+.cache/
+*.tsbuildinfo
+
+# Node
+node_modules/
+dist/
+npm-debug.log*
+
+# .NET
+bin/
+obj/
+.vs/
+*.user
+publish/
+TestResults/
+
+# DB
+*.db
+*.db-shm
+*.db-wal
+
+# Env
+.env
+.env.local
+appsettings.*.local.json
+
+# OS
+Thumbs.db
+.DS_Store
